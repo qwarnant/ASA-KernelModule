@@ -6,6 +6,7 @@
 #include <linux/jiffies.h>
 #include <linux/string.h>
 #include <asm/uaccess.h>
+#include <linux/kprobes.h>
 
 
 #define JIFFIES_BUFFER_LEN 7
@@ -15,6 +16,21 @@ static struct proc_dir_entry *proc_dir;
 static struct proc_dir_entry *proc_current_proc_file;
 
 static int proc_current_pid = 0;
+
+static int my_callback(pid_t pid, int policy,
+                              const struct sched_param *param) {
+	printk(KERN_INFO "ASE_CMD: My callback is called\n");
+
+	return 0;
+}
+
+static struct jprobe my_jprobe = {
+    .kp = {
+    .symbol_name = "yes",
+    },
+    .entry = (kprobe_opcode_t *) my_callback
+};
+
 
 static int 
 jiffies_proc_show(struct seq_file *m, void *v)
@@ -57,9 +73,22 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
     proc_current_pid = res;
     printk(KERN_INFO "ASE_CMD: PID received : %ld\n", proc_current_pid);
 
+    pid_struct = find_get_pid(proc_current_pid);
+    // TODO get the task structure and the name of the process
+
     if(proc_dir != NULL) {
-    	printk(KERN_INFO "Create current proc file in ase directory\n");
+    	printk(KERN_INFO "ASE_CMD: Create current proc file in ase directory\n");
     	proc_current_proc_file = proc_create(jiffies_buffer,0666,proc_dir, &proc_current_fops);	
+
+         my_jprobe.kp.addr =
+                 (kprobe_opcode_t *) kallsyms_lookup_name("yes"); // Find how to have the kernel address of the PID/name
+         if (!my_jprobe.kp.addr) {
+                 printk("Couldn't find %s to plant jprobe\n", "yes");
+                 return -1;
+        }
+        register_jprobe(&my_jprobe);
+        printk(KERN_ALERT "ASE_CMD: plant jprobe at %p, handler addr %p\n", my_jprobe.kp.addr, my_jprobe.entry);
+
     }
     return len;
 }
@@ -80,7 +109,7 @@ jiffies_proc_init(void)
     proc_dir = proc_mkdir("ase", NULL);
 
     if(proc_dir == NULL)
-	printk(KERN_ERR "Failed to create the ase proc directory\n");
+	printk(KERN_ERR "ASE_CMD: Failed to create the ase proc directory\n");
 
     return 0;
 }
@@ -88,8 +117,10 @@ jiffies_proc_init(void)
 static void __exit
 jiffies_proc_exit(void)
 {
-    remove_proc_entry("ase_cmd", NULL);
+    unregister_jprobe(&my_jprobe);
+
     remove_proc_entry("ase", NULL);
+    remove_proc_entry("ase_cmd", NULL);
 }
 
 module_init(jiffies_proc_init);

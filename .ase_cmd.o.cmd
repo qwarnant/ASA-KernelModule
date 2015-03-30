@@ -629,6 +629,171 @@ deps_/gfs/warnant/modules/ase_cmd/ase_cmd.o := \
   /gfs/warnant/linux-3.19.1/arch/x86/include/asm/smap.h \
     $(wildcard include/config/x86/smap.h) \
   /gfs/warnant/linux-3.19.1/arch/x86/include/asm/uaccess_32.h \
+  /gfs/warnant/linux-3.19.1/include/linux/kprobes.h \
+    $(wildcard include/config/kretprobes.h) \
+    $(wildcard include/config/kprobes/sanity/test.h) \
+    $(wildcard include/config/optprobes.h) \
+    $(wildcard include/config/kprobes/on/ftrace.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/ftrace.h \
+    $(wildcard include/config/function/tracer.h) \
+    $(wildcard include/config/dynamic/ftrace/with/regs.h) \
+    $(wildcard include/config/dynamic/ftrace.h) \
+    $(wildcard include/config/stack/tracer.h) \
+    $(wildcard include/config/function/graph/tracer.h) \
+    $(wildcard include/config/frame/pointer.h) \
+    $(wildcard include/config/ftrace/syscalls.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/trace_clock.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/trace_clock.h \
+  /gfs/warnant/linux-3.19.1/include/linux/kallsyms.h \
+  /gfs/warnant/linux-3.19.1/include/linux/ptrace.h \
+  /gfs/warnant/linux-3.19.1/include/linux/sched.h \
+    $(wildcard include/config/sched/debug.h) \
+    $(wildcard include/config/no/hz/common.h) \
+    $(wildcard include/config/lockup/detector.h) \
+    $(wildcard include/config/detect/hung/task.h) \
+    $(wildcard include/config/core/dump/default/elf/headers.h) \
+    $(wildcard include/config/sched/autogroup.h) \
+    $(wildcard include/config/virt/cpu/accounting/native.h) \
+    $(wildcard include/config/bsd/process/acct.h) \
+    $(wildcard include/config/taskstats.h) \
+    $(wildcard include/config/audit.h) \
+    $(wildcard include/config/cgroups.h) \
+    $(wildcard include/config/inotify/user.h) \
+    $(wildcard include/config/fanotify.h) \
+    $(wildcard include/config/posix/mqueue.h) \
+    $(wildcard include/config/keys.h) \
+    $(wildcard include/config/perf/events.h) \
+    $(wildcard include/config/schedstats.h) \
+    $(wildcard include/config/task/delay/acct.h) \
+    $(wildcard include/config/sched/mc.h) \
+    $(wildcard include/config/fair/group/sched.h) \
+    $(wildcard include/config/rt/group/sched.h) \
+    $(wildcard include/config/cgroup/sched.h) \
+    $(wildcard include/config/blk/dev/io/trace.h) \
+    $(wildcard include/config/compat/brk.h) \
+    $(wildcard include/config/memcg/kmem.h) \
+    $(wildcard include/config/virt/cpu/accounting/gen.h) \
+    $(wildcard include/config/sysvipc.h) \
+    $(wildcard include/config/rt/mutexes.h) \
+    $(wildcard include/config/task/xacct.h) \
+    $(wildcard include/config/cpusets.h) \
+    $(wildcard include/config/futex.h) \
+    $(wildcard include/config/fault/injection.h) \
+    $(wildcard include/config/latencytop.h) \
+    $(wildcard include/config/bcache.h) \
+    $(wildcard include/config/have/unstable/sched/clock.h) \
+    $(wildcard include/config/irq/time/accounting.h) \
+    $(wildcard include/config/no/hz/full.h) \
+    $(wildcard include/config/stack/growsup.h) \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/sched.h \
+  /gfs/warnant/linux-3.19.1/include/linux/sched/prio.h \
+  /gfs/warnant/linux-3.19.1/include/linux/plist.h \
+    $(wildcard include/config/debug/pi/list.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/cputime.h \
+  arch/x86/include/generated/asm/cputime.h \
+  /gfs/warnant/linux-3.19.1/include/asm-generic/cputime.h \
+    $(wildcard include/config/virt/cpu/accounting.h) \
+  /gfs/warnant/linux-3.19.1/include/asm-generic/cputime_jiffies.h \
+  /gfs/warnant/linux-3.19.1/include/linux/sem.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/sem.h \
+  /gfs/warnant/linux-3.19.1/include/linux/ipc.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/ipc.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/ipcbuf.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/asm-generic/ipcbuf.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/sembuf.h \
+  /gfs/warnant/linux-3.19.1/include/linux/shm.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/shm.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/shmbuf.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/asm-generic/shmbuf.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/shmparam.h \
+  /gfs/warnant/linux-3.19.1/include/linux/signal.h \
+    $(wildcard include/config/old/sigaction.h) \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/signal.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/signal.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/signal.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/asm-generic/signal-defs.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/siginfo.h \
+  /gfs/warnant/linux-3.19.1/include/asm-generic/siginfo.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/asm-generic/siginfo.h \
+  /gfs/warnant/linux-3.19.1/include/linux/proportions.h \
+  /gfs/warnant/linux-3.19.1/include/linux/seccomp.h \
+    $(wildcard include/config/seccomp.h) \
+    $(wildcard include/config/have/arch/seccomp/filter.h) \
+    $(wildcard include/config/seccomp/filter.h) \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/seccomp.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/seccomp.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/seccomp_32.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/unistd.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/unistd.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/unistd.h \
+  arch/x86/include/generated/uapi/asm/unistd_32.h \
+  /gfs/warnant/linux-3.19.1/include/linux/rtmutex.h \
+    $(wildcard include/config/debug/rt/mutexes.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/resource.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/resource.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/uapi/asm/resource.h \
+  /gfs/warnant/linux-3.19.1/include/asm-generic/resource.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/asm-generic/resource.h \
+  /gfs/warnant/linux-3.19.1/include/linux/hrtimer.h \
+    $(wildcard include/config/high/res/timers.h) \
+    $(wildcard include/config/timerfd.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/timerqueue.h \
+  /gfs/warnant/linux-3.19.1/include/linux/task_io_accounting.h \
+    $(wildcard include/config/task/io/accounting.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/latencytop.h \
+  /gfs/warnant/linux-3.19.1/include/linux/cred.h \
+    $(wildcard include/config/debug/credentials.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/key.h \
+  /gfs/warnant/linux-3.19.1/include/linux/assoc_array.h \
+    $(wildcard include/config/associative/array.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/selinux.h \
+    $(wildcard include/config/security/selinux.h) \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/magic.h \
+  /gfs/warnant/linux-3.19.1/include/linux/pid_namespace.h \
+    $(wildcard include/config/pid/ns.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/mm.h \
+    $(wildcard include/config/ppc.h) \
+    $(wildcard include/config/parisc.h) \
+    $(wildcard include/config/metag.h) \
+    $(wildcard include/config/ksm.h) \
+    $(wildcard include/config/shmem.h) \
+    $(wildcard include/config/debug/vm/rb.h) \
+    $(wildcard include/config/debug/pagealloc.h) \
+    $(wildcard include/config/hugetlbfs.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/debug_locks.h \
+    $(wildcard include/config/debug/locking/api/selftests.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/page_ext.h \
+    $(wildcard include/config/page/owner.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/stacktrace.h \
+    $(wildcard include/config/stacktrace.h) \
+    $(wildcard include/config/user/stacktrace/support.h) \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/pgtable.h \
+    $(wildcard include/config/have/arch/soft/dirty.h) \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/pgtable_32.h \
+    $(wildcard include/config/highpte.h) \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/pgtable-2level.h \
+  /gfs/warnant/linux-3.19.1/include/asm-generic/pgtable.h \
+  /gfs/warnant/linux-3.19.1/include/linux/page-flags.h \
+    $(wildcard include/config/pageflags/extended.h) \
+    $(wildcard include/config/arch/uses/pg/uncached.h) \
+    $(wildcard include/config/memory/failure.h) \
+    $(wildcard include/config/swap.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/huge_mm.h \
+  /gfs/warnant/linux-3.19.1/include/linux/vmstat.h \
+    $(wildcard include/config/vm/event/counters.h) \
+    $(wildcard include/config/debug/tlbflush.h) \
+    $(wildcard include/config/debug/vm/vmacache.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/vm_event_item.h \
+    $(wildcard include/config/memory/balloon.h) \
+    $(wildcard include/config/balloon/compaction.h) \
+  /gfs/warnant/linux-3.19.1/include/linux/nsproxy.h \
+  /gfs/warnant/linux-3.19.1/include/linux/ns_common.h \
+  /gfs/warnant/linux-3.19.1/include/uapi/linux/ptrace.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/ftrace.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/kprobes.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/insn.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/inat.h \
+  /gfs/warnant/linux-3.19.1/arch/x86/include/asm/inat_types.h \
 
 /gfs/warnant/modules/ase_cmd/ase_cmd.o: $(deps_/gfs/warnant/modules/ase_cmd/ase_cmd.o)
 
