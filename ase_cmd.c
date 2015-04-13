@@ -7,6 +7,7 @@
 #include <linux/string.h>
 #include <asm/uaccess.h>
 #include <linux/kprobes.h>
+#include <linux/time.h>
 
 
 #define JIFFIES_BUFFER_LEN 7
@@ -16,17 +17,30 @@ static struct proc_dir_entry *proc_dir;
 static struct proc_dir_entry *proc_current_proc_file;
 
 static int proc_current_pid = 0;
+static struct pid *pid_struct;
+static struct task_struct *current_task_struct;
 
-static int my_callback(pid_t pid, int policy,
-                              const struct sched_param *param) {
-	printk(KERN_INFO "ASE_CMD: My callback is called\n");
+// In seconds
+static unsigned start_execution_time = 0;  
+static unsigned end_execution_time = 0; 
 
-	return 0;
+static void my_callback(struct task_struct * p) {
+        int final_execution_time = 0;
+	struct timeval time;
+	
+	if(p->pid == proc_current_pid) {
+
+	   do_gettimeofday(&time);
+	   end_execution_time = time.tv_sec;
+
+	   final_execution_time = end_execution_time - start_execution_time;
+	   printk(KERN_INFO "ASE_CMD: Execution time of process %s : %d\n", current_task_struct->comm, final_execution_time);
+	}
 }
 
 static struct jprobe my_jprobe = {
     .kp = {
-    .symbol_name = "yes",
+    .symbol_name = "release_task",
     },
     .entry = (kprobe_opcode_t *) my_callback
 };
@@ -57,13 +71,17 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
            size_t len, loff_t *data)
 {
     long res;
+    struct timeval time;
+    do_gettimeofday(&time);
+    start_execution_time = time.tv_sec;
 
+    // Get the process ID from the user
     printk(KERN_INFO "ASE_CMD : Input from user detected\n");
     if (len > (JIFFIES_BUFFER_LEN - 1)) {
     printk(KERN_INFO "ASE_CMD: error, input too long\n");
     return -EINVAL;
     }
-    else if (copy_from_user(jiffies_buffer, buff, len)) {
+    else if (copy_from_user(jiffies_buffer, buff, len-1)) {
     return -2;
     }
     jiffies_buffer[len] = 0;
@@ -73,21 +91,23 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
     proc_current_pid = res;
     printk(KERN_INFO "ASE_CMD: PID received : %ld\n", proc_current_pid);
 
+    // Get the PID structure of the current process
     pid_struct = find_get_pid(proc_current_pid);
-    // TODO get the task structure and the name of the process
+    if(pid_struct == NULL) {
+    	printk(KERN_ERR "ASE_CMD: There is no process with \n");
+	return -3;
+    }
+
+    // Get the task structure and the name of the current process
+    current_task_struct = get_pid_task(pid_struct, PIDTYPE_PID);
+    printk(KERN_INFO "ASE_CMD: Current process name : %s\n", current_task_struct->comm);
 
     if(proc_dir != NULL) {
     	printk(KERN_INFO "ASE_CMD: Create current proc file in ase directory\n");
     	proc_current_proc_file = proc_create(jiffies_buffer,0666,proc_dir, &proc_current_fops);	
 
-         my_jprobe.kp.addr =
-                 (kprobe_opcode_t *) kallsyms_lookup_name("yes"); // Find how to have the kernel address of the PID/name
-         if (!my_jprobe.kp.addr) {
-                 printk("Couldn't find %s to plant jprobe\n", "yes");
-                 return -1;
-        }
         register_jprobe(&my_jprobe);
-        printk(KERN_ALERT "ASE_CMD: plant jprobe at %p, handler addr %p\n", my_jprobe.kp.addr, my_jprobe.entry);
+        printk(KERN_ALERT "ASE_CMD: plant jprobe at %p\n", my_jprobe.entry);
 
     }
     return len;
@@ -106,7 +126,7 @@ static int __init
 jiffies_proc_init(void)
 {
     proc_create("ase_cmd", 0666, NULL, &jiffies_proc_fops);
-    proc_dir = proc_mkdir("ase", NULL);
+    proc_dir = proc_mkdir_data("ase", 0777, NULL, NULL);
 
     if(proc_dir == NULL)
 	printk(KERN_ERR "ASE_CMD: Failed to create the ase proc directory\n");
