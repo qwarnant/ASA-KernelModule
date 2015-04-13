@@ -22,9 +22,10 @@ static struct task_struct *current_task_struct;
 // In seconds
 static unsigned start_execution_time = 0;  
 static unsigned end_execution_time = 0; 
+static int final_execution_time = 0;
 
-static void my_callback(struct task_struct * p) {
-        int final_execution_time = 0;
+static int my_callback(struct task_struct * p) {
+       
 	struct timeval time;
 	
 	if(p->pid == proc_current_pid) {
@@ -35,6 +36,8 @@ static void my_callback(struct task_struct * p) {
 	   final_execution_time = end_execution_time - start_execution_time;
 	   printk(KERN_INFO "ASE_CMD: Execution time of process %s : %d\n", current_task_struct->comm, final_execution_time);
 	}
+        
+        return 0;
 }
 
 static struct jprobe my_jprobe = {
@@ -48,9 +51,9 @@ static struct jprobe my_jprobe = {
 static int 
 ase_proc_show(struct seq_file *m, void *v)
 {
-    if (proc_current_pid)
-    seq_printf(m, "%llu\n",
-           (unsigned long long) get_jiffies_64());
+ printk(KERN_INFO "ASE_CMD: ase_proc_show\n");
+    //if (proc_current_pid)
+    //seq_printf(m, "%d\n",final_execution_time);
     return 0;
 }
 
@@ -106,7 +109,7 @@ ase_proc_write(struct file *filp, const char __user *buff,
     	proc_current_proc_file = proc_create(ase_buffer,0666,proc_dir, &proc_current_fops);	
 
         register_jprobe(&my_jprobe);
-        printk(KERN_ALERT "ASE_CMD: plant jprobe at %p\n", my_jprobe.entry);
+        printk(KERN_INFO "ASE_CMD: plant jprobe at %p\n", my_jprobe.entry);
 
     }
     return len;
