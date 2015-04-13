@@ -3,7 +3,6 @@
 #include <linux/proc_fs.h>
 #include <linux/init.h>
 #include <linux/seq_file.h>
-#include <linux/ase.h>
 #include <linux/string.h>
 #include <asm/uaccess.h>
 #include <linux/kprobes.h>
@@ -51,7 +50,7 @@ ase_proc_show(struct seq_file *m, void *v)
 {
     if (proc_current_pid)
     seq_printf(m, "%llu\n",
-           (unsigned long long) get_ase_64());
+           (unsigned long long) get_jiffies_64());
     return 0;
 }
 
