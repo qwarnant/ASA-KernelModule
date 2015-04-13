@@ -3,15 +3,15 @@
 #include <linux/proc_fs.h>
 #include <linux/init.h>
 #include <linux/seq_file.h>
-#include <linux/jiffies.h>
+#include <linux/ase.h>
 #include <linux/string.h>
 #include <asm/uaccess.h>
 #include <linux/kprobes.h>
 #include <linux/time.h>
 
 
-#define JIFFIES_BUFFER_LEN 7
-static char jiffies_buffer[JIFFIES_BUFFER_LEN];
+#define ase_BUFFER_LEN 7
+static char ase_buffer[ase_BUFFER_LEN];
 
 static struct proc_dir_entry *proc_dir;
 static struct proc_dir_entry *proc_current_proc_file;
@@ -47,27 +47,27 @@ static struct jprobe my_jprobe = {
 
 
 static int 
-jiffies_proc_show(struct seq_file *m, void *v)
+ase_proc_show(struct seq_file *m, void *v)
 {
     if (proc_current_pid)
     seq_printf(m, "%llu\n",
-           (unsigned long long) get_jiffies_64());
+           (unsigned long long) get_ase_64());
     return 0;
 }
 
 static int 
-jiffies_proc_open(struct inode *inode, struct file *file)
+ase_proc_open(struct inode *inode, struct file *file)
 {
-    return single_open(file, jiffies_proc_show, NULL);
+    return single_open(file, ase_proc_show, NULL);
 }
 
 static const struct file_operations proc_current_fops = {
     .owner      = THIS_MODULE,
-    .open       = jiffies_proc_open
+    .open       = ase_proc_open
 };
 
 static ssize_t
-jiffies_proc_write(struct file *filp, const char __user *buff,
+ase_proc_write(struct file *filp, const char __user *buff,
            size_t len, loff_t *data)
 {
     long res;
@@ -77,16 +77,16 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
 
     // Get the process ID from the user
     printk(KERN_INFO "ASE_CMD : Input from user detected\n");
-    if (len > (JIFFIES_BUFFER_LEN - 1)) {
+    if (len > (ase_BUFFER_LEN - 1)) {
     printk(KERN_INFO "ASE_CMD: error, input too long\n");
     return -EINVAL;
     }
-    else if (copy_from_user(jiffies_buffer, buff, len-1)) {
+    else if (copy_from_user(ase_buffer, buff, len-1)) {
     return -2;
     }
-    jiffies_buffer[len] = 0;
+    ase_buffer[len] = 0;
 
-    kstrtol(jiffies_buffer, 0, &res);
+    kstrtol(ase_buffer, 0, &res);
 
     proc_current_pid = res;
     printk(KERN_INFO "ASE_CMD: PID received : %ld\n", proc_current_pid);
@@ -94,7 +94,7 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
     // Get the PID structure of the current process
     pid_struct = find_get_pid(proc_current_pid);
     if(pid_struct == NULL) {
-    	printk(KERN_ERR "ASE_CMD: There is no process with \n");
+    	printk(KERN_ERR "ASE_CMD: There is no process with %d\n", proc_current_pid);
 	return -3;
     }
 
@@ -104,7 +104,7 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
 
     if(proc_dir != NULL) {
     	printk(KERN_INFO "ASE_CMD: Create current proc file in ase directory\n");
-    	proc_current_proc_file = proc_create(jiffies_buffer,0666,proc_dir, &proc_current_fops);	
+    	proc_current_proc_file = proc_create(ase_buffer,0666,proc_dir, &proc_current_fops);	
 
         register_jprobe(&my_jprobe);
         printk(KERN_ALERT "ASE_CMD: plant jprobe at %p\n", my_jprobe.entry);
@@ -113,19 +113,19 @@ jiffies_proc_write(struct file *filp, const char __user *buff,
     return len;
 }
 
-static const struct file_operations jiffies_proc_fops = {
+static const struct file_operations ase_proc_fops = {
     .owner      = THIS_MODULE,
-    .open       = jiffies_proc_open,
+    .open       = ase_proc_open,
     .read       = seq_read,
-    .write      = jiffies_proc_write,
+    .write      = ase_proc_write,
     .llseek     = seq_lseek,
     .release    = single_release,
 };
 
 static int __init
-jiffies_proc_init(void)
+ase_proc_init(void)
 {
-    proc_create("ase_cmd", 0666, NULL, &jiffies_proc_fops);
+    proc_create("ase_cmd", 0666, NULL, &ase_proc_fops);
     proc_dir = proc_mkdir_data("ase", 0777, NULL, NULL);
 
     if(proc_dir == NULL)
@@ -135,16 +135,21 @@ jiffies_proc_init(void)
 }
 
 static void __exit
-jiffies_proc_exit(void)
+ase_proc_exit(void)
 {
     unregister_jprobe(&my_jprobe);
 
-    remove_proc_entry("ase", NULL);
+    printk(KERN_INFO "ASE_CMD: Cleanup ase_cmd module\n");
+
     remove_proc_entry("ase_cmd", NULL);
+    printk(KERN_INFO "ASE_CMD: ase_cmd file removed\n");
+
+    remove_proc_subtree("ase", NULL);
+    printk(KERN_INFO "ASE_CMD: ase folder removed\n");
 }
 
-module_init(jiffies_proc_init);
-module_exit(jiffies_proc_exit);
+module_init(ase_proc_init);
+module_exit(ase_proc_exit);
 
 MODULE_AUTHOR("Quentin WARNANT & Antoine Durigneux");
 MODULE_LICENSE("GPL");
