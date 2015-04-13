@@ -26,6 +26,7 @@ static int final_execution_time = 0;
 
 static int my_callback(struct task_struct * p) {
        
+
 	struct timeval time;
 	
 	if(p->pid == proc_current_pid) {
@@ -36,7 +37,10 @@ static int my_callback(struct task_struct * p) {
 	   final_execution_time = end_execution_time - start_execution_time;
 	   printk(KERN_INFO "ASE_CMD: Execution time of process %s : %d\n", current_task_struct->comm, final_execution_time);
 	}
-        
+  
+/* Always end with a call to jprobe_return(). */
+        jprobe_return();
+      
         return 0;
 }
 
@@ -51,15 +55,24 @@ static struct jprobe my_jprobe = {
 static int 
 ase_proc_show(struct seq_file *m, void *v)
 {
- printk(KERN_INFO "ASE_CMD: ase_proc_show\n");
-    //if (proc_current_pid)
-    //seq_printf(m, "%d\n",final_execution_time);
+	/*struct timeval time;
+	
+	if(p->pid == proc_current_pid) {
+
+	   do_gettimeofday(&time);
+	   end_execution_time = time.tv_sec;
+
+	   final_execution_time = end_execution_time - start_execution_time;
+	   printk(KERN_INFO "ASE_CMD: Execution time of process %s : %d\n", current_task_struct->comm, final_execution_time);
+	}
+*/
     return 0;
 }
 
 static int 
 ase_proc_open(struct inode *inode, struct file *file)
 {
+    printk(KERN_INFO "ASE_CMD: ase_proc_show %s\n", (char*) file->f_path.dentry->d_iname);
     return single_open(file, ase_proc_show, NULL);
 }
 
@@ -108,7 +121,6 @@ ase_proc_write(struct file *filp, const char __user *buff,
     	printk(KERN_INFO "ASE_CMD: Create current proc file in ase directory\n");
     	proc_current_proc_file = proc_create(ase_buffer,0666,proc_dir, &proc_current_fops);	
 
-        register_jprobe(&my_jprobe);
         printk(KERN_INFO "ASE_CMD: plant jprobe at %p\n", my_jprobe.entry);
 
     }
@@ -127,6 +139,16 @@ static const struct file_operations ase_proc_fops = {
 static int __init
 ase_proc_init(void)
 {
+    
+int ret;
+
+	ret = register_jprobe(&my_jprobe);
+	if (ret < 0) {
+	  printk(KERN_INFO "ASE_CMD: register_jprobe failed, returned %d\n", ret);
+	  return -1;
+	}
+	printk(KERN_INFO "ASE_CMD: Planted jprobe at %p, handler addr %p\n",my_jprobe.kp.addr, my_jprobe.entry);
+
     proc_create("ase_cmd", 0666, NULL, &ase_proc_fops);
     proc_dir = proc_mkdir_data("ase", 0777, NULL, NULL);
 
