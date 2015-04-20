@@ -29,6 +29,20 @@ static struct proct monitor[ASE_MAX_PROCT];
 
 static int my_callback(struct task_struct * p) {
 
+	int i = 0;
+	for(i = 0; i < proct_count; i++){
+		struct proct value = monitor[i];
+		if(p->pid == value.pid){
+
+			//delete here and move others
+			int j = 0;
+			for(j = i ; j < ASE_MAX_PROCT-1 ; j++){
+				monitor[j] = monitor[j+1];	
+			}
+			proct_count--;
+			break;		
+		}
+	}
 	/* Always end with a call to jprobe_return(). */
 	jprobe_return();
 
