@@ -5,3 +5,6 @@
 *~
 modules.order 
 Module.symvers
+.tmp_versions
+.ase_cmd*
+ase@*
