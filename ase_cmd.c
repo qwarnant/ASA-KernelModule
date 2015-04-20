@@ -13,6 +13,7 @@
 static char ase_buffer[ase_BUFFER_LEN];
 
 typedef struct proct {
+	long pid;
 	struct proc_dir_entry *proct_proc_file;
 	struct pid *proct_pid_struct;
 	struct task_struct *proct_task_struct;
@@ -36,25 +37,50 @@ static int my_callback(struct task_struct * p) {
 static struct jprobe my_jprobe = { .kp = { .symbol_name = "release_task", },
 	.entry = (kprobe_opcode_t *) my_callback };
 
+static int 
+ase_proc_show(struct seq_file *m, void *v)
+{
+    return 0;
+}
+
 static int ase_proc_open(struct inode *inode, struct file *file) {
+	return single_open(file, ase_proc_show, NULL );
+}
 
+ssize_t ase_proc_read(struct file * file, char * buf, size_t size, loff_t * ppos) {
 	struct timeval time;
-	int end_execution_time = 0, final_execution_time = 0, start_execution_time = 0;
+	proct current_task;
+	int i = 0, end_execution_time = 0;
+	long res;
 
+	// Get the current time
 	do_gettimeofday(&time);
 	end_execution_time = time.tv_sec;
 
-	final_execution_time = end_execution_time - start_execution_time;
 
-	seq_printf(m, "ASE_CMD: Execution time of process : %s\n", (char*) v)
-	printk(KERN_INFO "ASE_CMD: ase_proc_show %s\n", (char*) file->f_path.dentry->d_iname);
+	// Get the PID integer from the user input
+	if(kstrtol(file->f_path.dentry->d_iname, 0, &res) != 0) {
+		return 0;
+	}
 
+	// Get the current task structure
+	for(i = 0; i < proct_count; i++) {
+		if(res == monitor[i].pid) {
+			current_task = monitor[i];
+		}
+	}
 
-	return single_open(file, NULL, NULL );
+	// Compute the elapsed time
+	current_task.proct_final_time = end_execution_time - current_task.proct_start_time;
+	printk(KERN_INFO "%d\n", current_task.proct_final_time);
+
+	// Write the sequence to the file
+	sprintf(buf, "%d\n", current_task.proct_final_time);
+
+	return seq_read (file, buf, sizeof(int), ppos);
 }
 
-static const struct file_operations proc_current_fops = { .owner = THIS_MODULE,
-	.open = ase_proc_open, .read = seq_read, .llseek = seq_lseek, .release =
+static const struct file_operations proc_current_fops = { .owner = THIS_MODULE, 	.open = ase_proc_open, .read = ase_proc_read, .llseek = seq_lseek, .release =
 			single_release };
 
 static ssize_t
@@ -115,6 +141,7 @@ ase_proc_write(struct file *filp, const char __user *buff,
 	current_track.proct_pid_struct = pid_struct;
 	current_track.proct_task_struct = current_task_struct;
 	current_track.proct_start_time = start_execution_time;
+	current_track.pid = res;
 
 	monitor[proct_count++] = current_track;
 
@@ -123,7 +150,7 @@ ase_proc_write(struct file *filp, const char __user *buff,
 
 static const struct file_operations ase_proc_fops = { 
 	.owner = THIS_MODULE,
-	.open = ase_proc_open, 
+	.open = ase_proc_open,
 	.read = seq_read, 
 	.write = ase_proc_write, 
 	.llseek = seq_lseek, 
