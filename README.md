@@ -14,5 +14,14 @@ The goal of this project is to write a kernel module which monitors the executio
 6. Track the execution time of a process on each core. This means that, if the process never migrates, the run time in one of the cores must be zero. Write a test by using affinities that verifies that this is indeed the case (_hint_: you must intercept the appropriate functions to identify when a process migrates).
 
 # How to use 
+You can launch the bash script ase_launch.sh in order to run the module. 
+```bash
+	sudo ./ase_launch.sh 
+```
+- The script installs the module in the kernel, launches two background commands (yes) and tracks the execution time of theses process between several sleep() calls.
+- When the job is done, the script removes the module of the kernel : the folder data of the ase_cmd and the memory associated to the module are freed. 
 
+# Additional information
+- We have completed the five first check points of the project. 
+- We have started (but not finished) the implementation of the multi-core module. In fact, as you can see in the proct structure, the time data are put in arrays.
 
