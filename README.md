@@ -19,9 +19,9 @@ You can launch the bash script ase_launch.sh in order to run the module.
 	sudo ./ase_launch.sh 
 ```
 - The script installs the module in the kernel, launches two background commands (yes) and tracks the execution time of theses process between several sleep() calls.
-- When the job is done, the script removes the module of the kernel : the folder data of the ase_cmd and the memory associated to the module are freed. 
+- When the job is done, the script removes the module from the kernel : the folder data of the ase_cmd and the memory associated to the module are freed. 
 
 # Additional information
 - We have completed the five first check points of the project. 
-- We have started (but not finished) the implementation of the multi-core module. In fact, as you can see in the proct structure, the time data are put in arrays.
+- We have started (but not finished) the implementation of the multi-core module. In fact, as you can see in the proct structure, the time data are put in arrays in order to adapt the module for multi-core execution time tracking.
 
