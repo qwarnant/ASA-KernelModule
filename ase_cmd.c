@@ -10,6 +10,7 @@
 
 #define ase_BUFFER_LEN 7
 #define ASE_MAX_PROCT 99
+#define ASE_MAX_PROCESSOR 2
 static char ase_buffer[ase_BUFFER_LEN];
 
 typedef struct proct {
@@ -17,9 +18,9 @@ typedef struct proct {
 	struct proc_dir_entry *proct_proc_file;
 	struct pid *proct_pid_struct;
 	struct task_struct *proct_task_struct;
-	unsigned proct_start_time;
-	unsigned proct_end_time;
-	unsigned proct_final_time;
+	unsigned proct_start_time[ASE_MAX_PROCESSOR];
+	unsigned proct_end_time[ASE_MAX_PROCESSOR];
+	unsigned proct_final_time[ASE_MAX_PROCESSOR];
 } proct;
 
 static struct proc_dir_entry *proc_dir;
@@ -50,7 +51,7 @@ static int ase_proc_open(struct inode *inode, struct file *file) {
 ssize_t ase_proc_read(struct file * file, char * buf, size_t size, loff_t * ppos) {
 	struct timeval time;
 	proct current_task;
-	int i = 0, end_execution_time = 0;
+	int i = 0, end_execution_time = 0, current_cpu;
 	long res;
 
 	// Get the current time
@@ -70,25 +71,32 @@ ssize_t ase_proc_read(struct file * file, char * buf, size_t size, loff_t * ppos
 		}
 	}
 
+	current_cpu = task_cpu(current_task.proct_task_struct);
+
 	// Compute the elapsed time
-	current_task.proct_final_time = end_execution_time - current_task.proct_start_time;
-	printk(KERN_INFO "%d\n", current_task.proct_final_time);
+	current_task.proct_final_time[current_cpu] = end_execution_time - current_task.proct_start_time[current_cpu];
+	printk(KERN_INFO "%d\n", current_task.proct_final_time[current_cpu]);
 
 	// Write the sequence to the file
-	sprintf(buf, "%d\n", current_task.proct_final_time);
+	sprintf(buf, "%d\n", current_task.proct_final_time[current_cpu]);
 
 	return seq_read (file, buf, sizeof(int), ppos);
 }
 
-static const struct file_operations proc_current_fops = { .owner = THIS_MODULE, 	.open = ase_proc_open, .read = ase_proc_read, .llseek = seq_lseek, .release =
-			single_release };
+static const struct file_operations proc_current_fops = { 
+	.owner = THIS_MODULE, 	
+	.open = ase_proc_open, 
+	.read = ase_proc_read, 
+	.llseek = seq_lseek, 
+	.release = single_release 
+};
 
 static ssize_t
 ase_proc_write(struct file *filp, const char __user *buff,
 	size_t len, loff_t *data)
 {
 	long res = 0;
-	int start_execution_time = 0;
+	int start_execution_time = 0, current_cpu = 0;
 	struct timeval time;
 	struct proct current_track;
 	struct pid *pid_struct;
@@ -125,7 +133,9 @@ ase_proc_write(struct file *filp, const char __user *buff,
 
 	// Get the task structure and the name of the current process
 	current_task_struct = get_pid_task(pid_struct, PIDTYPE_PID);
-	printk(KERN_INFO "ASE_CMD: Current process name : %s\n", current_task_struct->comm);
+	current_cpu = task_cpu(current_task_struct);
+
+	printk(KERN_INFO "ASE_CMD: Current process name %s on cpu %d: \n", current_task_struct->comm, current_cpu);
 
 	if(proc_dir == NULL) {
 		printk(KERN_ERR "ASE_CMD: Unable to create current proc file in ase directory\n");
@@ -140,7 +150,7 @@ ase_proc_write(struct file *filp, const char __user *buff,
 	current_track.proct_proc_file = proc_current_proc_file;
 	current_track.proct_pid_struct = pid_struct;
 	current_track.proct_task_struct = current_task_struct;
-	current_track.proct_start_time = start_execution_time;
+	current_track.proct_start_time[current_cpu] = start_execution_time;
 	current_track.pid = res;
 
 	monitor[proct_count++] = current_track;
