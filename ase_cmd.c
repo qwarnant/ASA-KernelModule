@@ -13,6 +13,15 @@
 #define ASE_MAX_PROCESSOR 2
 static char ase_buffer[ase_BUFFER_LEN];
 
+/*
+ Kernel Module :  ASE ++ : Linux Kernel Programming
+ AUTHORS : Quentin Warnant & Antoine Durigneux
+ Date : 20/04/2015
+*/
+
+/*
+Struct proct is used in order to track the process execution time 
+*/
 typedef struct proct {
 	long pid;
 	struct proc_dir_entry *proct_proc_file;
@@ -27,6 +36,11 @@ static struct proc_dir_entry *proc_dir;
 static int proct_count = 0;
 static struct proct monitor[ASE_MAX_PROCT];
 
+/*
+	This method is executed in our jprobe. It is useful when a file is closed.
+	At this point, we release the current structure of this file in our module
+	and reorgonize our structure.
+*/
 static int my_callback(struct task_struct * p) {
 
 	int i = 0;
@@ -62,6 +76,12 @@ static int ase_proc_open(struct inode *inode, struct file *file) {
 	return single_open(file, ase_proc_show, NULL );
 }
 
+/*
+	This method is used when a file under /proc/ase/{PID} is open/read.
+	In this case we update every information in our structure for that given PID and
+	we display thoses information (time) to the user.
+	
+*/
 ssize_t ase_proc_read(struct file * file, char * buf, size_t size, loff_t * ppos) {
 	struct timeval time;
 	proct current_task;
@@ -105,6 +125,12 @@ static const struct file_operations proc_current_fops = {
 	.release = single_release 
 };
 
+/*
+	This methode is use when there is something to write in the ase_cmd file.
+	In this case we are reading the input, which is a correct PID.
+	Then we create a file under /proc/ase that is named by the given PID.
+	and finally we register every information about the proccess for that PID in our module
+*/
 static ssize_t
 ase_proc_write(struct file *filp, const char __user *buff,
 	size_t len, loff_t *data)
@@ -172,6 +198,9 @@ ase_proc_write(struct file *filp, const char __user *buff,
 	return len;
 }
 
+/*
+	This structure is used in order to link our different callbacks for a file
+*/
 static const struct file_operations ase_proc_fops = { 
 	.owner = THIS_MODULE,
 	.open = ase_proc_open,
@@ -181,6 +210,11 @@ static const struct file_operations ase_proc_fops = {
 	.release = single_release
 };
 
+/*
+	This method is executed when our module is installed in the kernel.
+	We install and register our jprobe, then we create a /proc/ase folder
+	and we create a file /proc/ase_cmd that is used after.
+*/
 static int __init
 ase_proc_init(void) {
 
@@ -202,6 +236,11 @@ ase_proc_init(void) {
 	return 0;
 }
 
+/*
+	This method is executed when the module in removed/destroyed/exited
+	We unregister our jprobe and remove every files under the /proc/ase folder
+	and the folder itself.
+*/
 static void __exit
 ase_proc_exit(void) {
 	unregister_jprobe(&my_jprobe);
